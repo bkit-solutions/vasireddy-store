@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f4ee;
+  --foreground: #1a1816;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-family-base);
+  --font-heading: var(--font-family-heading);
+  --font-mono: var(--font-family-mono);
+
+  --color-studio-primary: #201d1a;
+  --color-studio-light: #efeae1;
+  --color-studio-accent: #a57a3e;
+  --color-studio-ink: #1a1816;
+  --color-studio-cream: #f7f4ee;
+  --color-studio-muted: #766b5d;
+}
+
+body {
+  background: #f7f4ee;
+  color: var(--foreground);
+  font-family: var(--font-family-base), "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  min-height: 100%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-family-heading), var(--font-family-base), "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-family-mono), "Consolas", "Courier New", monospace;
+}
+
+.section-shell {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+.gradient-panel {
+  background-color: #f6f2eb;
+}
+
+.studio-surface {
+  @apply rounded-3xl border border-studio-primary/10 bg-white/90 shadow-[0_20px_40px_-24px_rgba(32,29,26,0.28)] backdrop-blur;
+}
+
+.studio-card {
+  @apply rounded-2xl border border-studio-primary/10 bg-white shadow-[0_14px_28px_-22px_rgba(32,29,26,0.24)];
+}
+
+.studio-pill {
+  @apply rounded-full border border-studio-primary/20 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-studio-primary;
+}
+
+.studio-button-primary {
+  @apply rounded-full bg-studio-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-studio-accent;
+}
+
+.studio-button-secondary {
+  @apply rounded-full border border-studio-primary/20 bg-white px-5 py-2.5 text-sm font-semibold text-studio-primary transition hover:-translate-y-0.5 hover:border-studio-accent hover:text-studio-accent;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes soft-float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.animate-reveal-up {
+  animation: reveal-up 0.55s ease-out both;
+}
+
+.animate-soft-float {
+  animation: soft-float 3.5s ease-in-out infinite;
+}
