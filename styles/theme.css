@@ -1,5 +1,35 @@
 :root {
-  --studio-primary: #4b2e83;
-  --studio-light: #ede9fe;
-  --studio-accent: #7c3aed;
+  --studio-primary: #3b1f6b;
+  --studio-accent: #8b5cf6;
+  --studio-light: #f5f3ff;
+  --studio-cream: #fbf8f4;
+  --studio-gold: #c8a96a;
+  --studio-ink: #1a1625;
+
+  /* 🔥 SURFACE SYSTEM (IMPORTANT) */
+  --studio-surface: #fbf8f4;          /* main surfaces */
+  --studio-surface-strong: #f6f0e8;   /* cards/nav items */
+  --studio-surface-soft: #fffdfa;     /* inner surfaces */
+
+  /* 🔥 BORDERS */
+  --studio-border-soft: #e7ded2;
+
+  /* 🔥 HEADER (keep subtle, not dominant) */
+  --studio-header-gradient: linear-gradient(
+    135deg,
+    #f8f5ff 0%,
+    #f3ecff 25%,
+    #fdf8f3 60%,
+    #f6f0ff 100%
+  );
+}
+
+
+@keyframes gradient-shine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-shine {
+  animation: gradient-shine 4s ease-in-out infinite;
 }
