@@ -158,18 +158,24 @@ async function updateProduct(formData: FormData) {
   try {
     const imageUrl = await resolveProductImageUrl(formData);
 
+    const updateData: any = {
+      name,
+      slug,
+      description,
+      sku,
+      basePrice: Math.round(priceInRupees * 100),
+      stock: Number.isFinite(stock) ? Math.max(0, Math.round(stock)) : 0,
+      categoryId,
+    };
+
+    // Only update image if a new one is provided
+    if (imageUrl) {
+      updateData.imageUrl = imageUrl;
+    }
+
     await prisma.product.update({
       where: { id: productId },
-      data: {
-        name,
-        slug,
-        description,
-        sku,
-        basePrice: Math.round(priceInRupees * 100),
-        stock: Number.isFinite(stock) ? Math.max(0, Math.round(stock)) : 0,
-        categoryId,
-        imageUrl,
-      },
+      data: updateData,
     });
 
     await notifyCustomersAboutProductUpdate({
@@ -413,7 +419,7 @@ export default async function AdminProductsPage({
               name="slug"
               required
               placeholder="product-slug"
-              pattern="[a-z0-9-]+"
+              pattern="[a-z0-9\\-]+"
               title="Lowercase letters, numbers, and hyphens only"
               className="input-base"
             />
@@ -612,7 +618,7 @@ export default async function AdminProductsPage({
                       name="slug"
                       required
                       defaultValue={product.slug}
-                      pattern="[a-z0-9-]+"
+                      pattern="[a-z0-9\\-]+"
                       className="input-base"
                     />
                   </Field>
