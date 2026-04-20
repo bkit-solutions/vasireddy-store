@@ -1,4 +1,6 @@
-import { v2 as cloudinary } from "cloudinary";
+import cloudinaryPkg from "cloudinary";
+
+const cloudinary = ((cloudinaryPkg as any).v2 ?? cloudinaryPkg) as typeof import("cloudinary").v2;
 
 let configured = false;
 

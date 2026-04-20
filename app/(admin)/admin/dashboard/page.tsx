@@ -143,8 +143,8 @@ export default async function AdminDashboardPage() {
   const revenueChange = percentChange(thisMonthRevenue, lastMonthRevenue);
 
   const quickActions = [
-    { label: "Add Product", href: "/admin/products/new", icon: Plus },
-    { label: "Create Coupon", href: "/admin/coupons/new", icon: Ticket },
+    { label: "Add Product", href: "/admin/products", icon: Plus },
+    { label: "Create Coupon", href: "/admin/coupons", icon: Ticket },
     { label: "View Orders", href: "/admin/orders", icon: ShoppingBag },
   ];
 

@@ -29,6 +29,15 @@ export function CartClient({ initialItems }: CartClientProps) {
   const [items, setItems] = useState<CartItem[]>(initialItems);
   const [loadingItemId, setLoadingItemId] = useState<string | null>(null);
   const [placingOrder, setPlacingOrder] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<
+    | {
+        code: string;
+        discountPercent: number;
+      }
+    | null
+  >(null);
+  const [couponLoading, setCouponLoading] = useState(false);
 
   const total = useMemo(
     () =>
@@ -39,6 +48,12 @@ export function CartClient({ initialItems }: CartClientProps) {
       ),
     [items]
   );
+
+  const discount = appliedCoupon
+    ? Math.round((total * appliedCoupon.discountPercent) / 100)
+    : 0;
+
+  const totalAfterDiscount = total - discount;
 
   async function updateQuantity(itemId: string, quantity: number) {
     setLoadingItemId(itemId);
@@ -78,6 +93,40 @@ export function CartClient({ initialItems }: CartClientProps) {
     toast.error("Remove failed");
   }
 
+  async function applyCoupon() {
+    const code = couponCode.trim().toUpperCase();
+    if (!code || couponLoading) return;
+
+    setCouponLoading(true);
+
+    try {
+      const response = await fetch("/api/coupons/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || "Coupon not valid");
+        setAppliedCoupon(null);
+        return;
+      }
+
+      setAppliedCoupon({
+        code: result.code,
+        discountPercent: result.discountPercent,
+      });
+      toast.success(`Coupon ${result.code} applied!`);
+    } catch (error) {
+      toast.error("Coupon validation failed");
+      setAppliedCoupon(null);
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
   // 🔥 NEW RAZORPAY FUNCTION
   async function placeOrder() {
     if (!items.length || placingOrder) return;
@@ -95,12 +144,16 @@ export function CartClient({ initialItems }: CartClientProps) {
         // 1️⃣ Create order (DB + Razorpay)
         const res = await fetch("/api/orders/create", {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            couponCode: appliedCoupon?.code ?? null,
+          }),
         });
 
         const data = await res.json();
 
         if (!res.ok) {
-          toast.error("Failed to initiate payment");
+          toast.error(data.error || "Failed to initiate payment");
           setPlacingOrder(false);
           return;
         }
@@ -224,6 +277,53 @@ export function CartClient({ initialItems }: CartClientProps) {
         <div className="mt-4 flex justify-between">
           <span>Subtotal</span>
           <span>{formatCurrency(total)}</span>
+        </div>
+
+        <div className="mt-4">
+          <label htmlFor="couponCode" className="text-sm font-medium text-studio-ink/80">
+            Coupon code
+          </label>
+          <div className="mt-2 flex gap-2">
+            <input
+              id="couponCode"
+              value={couponCode}
+              onChange={(event) => setCouponCode(event.target.value)}
+              placeholder="Enter coupon"
+              className="w-full rounded-xl border border-studio-primary/15 bg-studio-light/50 px-3 py-2 text-sm focus:border-studio-primary focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={applyCoupon}
+              disabled={couponLoading || !couponCode.trim()}
+              className="rounded-full bg-studio-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              {couponLoading ? "Applying..." : "Apply"}
+            </button>
+          </div>
+          {appliedCoupon ? (
+            <p className="mt-3 text-sm text-emerald-600">
+              Coupon "{appliedCoupon.code}" applied — {appliedCoupon.discountPercent}% off.
+              <button
+                type="button"
+                onClick={() => {
+                  setAppliedCoupon(null);
+                  setCouponCode("");
+                }}
+                className="ml-2 underline"
+              >
+                Remove
+              </button>
+            </p>
+          ) : null}
+        </div>
+
+        <div className="mt-4 flex justify-between">
+          <span>Discount</span>
+          <span>-{formatCurrency(discount)}</span>
+        </div>
+        <div className="mt-4 flex justify-between border-t border-studio-primary/10 pt-4 text-lg font-semibold">
+          <span>Total</span>
+          <span>{formatCurrency(totalAfterDiscount)}</span>
         </div>
 
         <button

@@ -4,12 +4,15 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { razorpay } from "@/lib/razorpay";
 
-export async function POST() {
+export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const body = (await request.json()) as { couponCode?: string | null };
+  const couponCode = body.couponCode?.trim().toUpperCase() ?? null;
 
   const cart = await prisma.cart.findUnique({
     where: { userId: session.user.id },
@@ -29,9 +32,26 @@ export async function POST() {
     0
   );
 
+  let finalAmount = totalAmount;
+
+  if (couponCode) {
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: couponCode },
+    });
+
+    if (!coupon || !coupon.active || (coupon.expiresAt && coupon.expiresAt <= new Date())) {
+      return NextResponse.json(
+        { error: "Coupon not found, expired, or inactive" },
+        { status: 400 }
+      );
+    }
+
+    finalAmount = Math.round((totalAmount * (100 - coupon.discountPercent)) / 100);
+  }
+
   // ✅ Create Razorpay order
   const razorpayOrder = await razorpay.orders.create({
-    amount: totalAmount,
+    amount: finalAmount,
     currency: "INR",
     receipt: `receipt_${Date.now()}`,
   });
@@ -40,7 +60,7 @@ export async function POST() {
   const order = await prisma.order.create({
     data: {
       userId: session.user.id,
-      totalAmount,
+      totalAmount: finalAmount,
       status: "PENDING",
       razorpayOrderId: razorpayOrder.id,
       items: {
