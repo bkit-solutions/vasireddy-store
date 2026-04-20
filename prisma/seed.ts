@@ -21,7 +21,7 @@ async function upsertProduct(data: {
   categoryId: string;
 }) {
   return prisma.product.upsert({
-    where: { slug: data.slug },
+    where: { sku: data.sku },
     update: {},
     create: {
       ...data,
