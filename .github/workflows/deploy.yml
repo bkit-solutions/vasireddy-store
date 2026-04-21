@@ -1,4 +1,4 @@
-name: Deploy to vasireddy.online
+name: Deploy to EC2
 
 on:
   push:
@@ -7,29 +7,48 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy via SSH
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            set -e
 
-            echo "===> Pulling latest code"
-            cd ${{ secrets.EC2_APP_DIR }}
+            echo "🚀 Starting deployment..."
+
+            cd ~
+
+            # Clone if app doesn't exist
+            if [ ! -d "app" ]; then
+              git clone https://github.com/bkit-solutions/vasireddy-store.git app
+            fi
+
+            cd app
+
+            # Backup current version (for rollback)
+            cp -r . ../app_backup_$(date +%s)
+
+            # Pull latest code
             git fetch origin
             git reset --hard origin/main
 
-            echo "===> Installing dependencies"
-            npm ci --omit=dev
+            # Restore env
+            cp ~/.env .env
 
-            echo "===> Reloading app"
-            pm2 reload vr-ecom --update-env
+            # Install deps
+            npm install
 
-            echo "===> Deploy complete"
-            pm2 status
+            # Build app
+            npm run build
+
+            # Restart app safely
+            pm2 restart vr-ecom || pm2 start npm --name "vr-ecom" -- start
+
+            # Save PM2 process list
+            pm2 save
+
+            echo "✅ Deployment completed!"
