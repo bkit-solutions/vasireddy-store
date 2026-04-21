@@ -2,9 +2,11 @@ import Link from "next/link";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { UserRole } from "@prisma/client";
+import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { sendOfferAnnouncementEmail } from "@/lib/mailer";
 import { uploadProductImage } from "@/lib/product-image";
+import { deleteProductImages } from "@/lib/s3-utils";
 import { formatCurrency } from "@/lib/utils";
 
 const PAGE_SIZE = 6;
@@ -39,13 +41,21 @@ async function notifyCustomersAboutProductUpdate(input: {
   }
 }
 
-async function resolveProductImageUrl(formData: FormData): Promise<string | null> {
+/**
+ * Resolve product image URL from either uploaded file or input URL
+ * @param formData - Form data containing imageUrl or imageFile
+ * @param productId - Product ID for S3 folder organization (required for S3)
+ * @returns Image URL or null
+ */
+async function resolveProductImageUrl(formData: FormData, productId?: string): Promise<string | null> {
   const inputUrl = String(formData.get("imageUrl") ?? "").trim();
   const imageFile = formData.get("imageFile");
 
   if (imageFile instanceof File && imageFile.size > 0) {
     try {
-      return await uploadProductImage(imageFile);
+      // Generate a temporary ID if not provided (for new products)
+      const uploadId = productId || randomUUID();
+      return await uploadProductImage(imageFile, uploadId);
     } catch (error) {
       console.error("Image upload failed", error);
       throw new Error("Failed to upload product image.");
@@ -94,9 +104,11 @@ async function createProduct(formData: FormData) {
   }
 
   try {
-    const imageUrl = await resolveProductImageUrl(formData);
+    // Generate a temporary ID for image upload (will be used for S3 folder)
+    const tempProductId = randomUUID();
+    const imageUrl = await resolveProductImageUrl(formData, tempProductId);
 
-    await prisma.product.create({
+    const newProduct = await prisma.product.create({
       data: {
         name,
         slug,
@@ -156,7 +168,8 @@ async function updateProduct(formData: FormData) {
   }
 
   try {
-    const imageUrl = await resolveProductImageUrl(formData);
+    // Pass productId for S3 folder organization
+    const imageUrl = await resolveProductImageUrl(formData, productId);
 
     const updateData: any = {
       name,
@@ -241,6 +254,9 @@ async function deleteProduct(formData: FormData) {
   if (!productId) return;
 
   try {
+    // Delete S3 images first
+    await deleteProductImages(productId);
+
     const deletedProduct = await prisma.product.delete({
       where: { id: productId },
       select: { name: true },
