@@ -1,25 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteFromS3, isS3Configured } from "@/lib/s3-uploader";
-import { auth } from "@/lib/auth";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-/**
- * DELETE /api/admin/s3-delete
- * Delete an image from S3
- * 
- * Request body:
- * {
- *   s3Key: string;
- * }
- * 
- * Response:
- * {
- *   success: boolean;
- * }
- */
 export async function DELETE(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await auth();
+    // ✅ Correct authentication
+    const session = await getServerSession(authOptions);
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
