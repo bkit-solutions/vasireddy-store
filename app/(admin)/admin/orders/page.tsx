@@ -4,6 +4,7 @@ import { OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { sendOrderStatusUpdateEmail } from "@/lib/mailer";
 import { formatCurrency } from "@/lib/utils";
+import { DeleteOrderButton } from "./delete-order-button";
 
 const PAGE_SIZE = 8;
 
@@ -139,16 +140,57 @@ async function updateOrderStatus(formData: FormData) {
   revalidatePath("/admin/orders");
 }
 
+// ── Delete Order Server Action ──────────────────────────────────────────────
+
+async function deleteOrder(formData: FormData) {
+  "use server";
+
+  const orderId = String(formData.get("orderId") ?? "");
+  if (!orderId) {
+    throw new Error("Order ID is required");
+  }
+
+  try {
+    // First, verify the order exists
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { id: true },
+    });
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    // Delete the order (OrderItems will cascade-delete automatically)
+    await prisma.order.delete({
+      where: { id: orderId },
+    });
+
+    console.log(`Order ${orderId} deleted successfully`);
+
+    // Revalidate both pages to clear cache
+    revalidatePath("/admin/orders");
+    revalidatePath("/admin/products");
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to delete order";
+    console.error("Delete order failed:", errorMessage);
+    throw error;
+  }
+}
+
 // ── Page (logic UNCHANGED, UI enhanced) ──────────────────────────────────────
 
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; status?: string; message?: string }>;
 }) {
   const resolvedSearchParams = await searchParams;
   const q = resolvedSearchParams.q?.trim() ?? "";
   const page = Math.max(1, Number(resolvedSearchParams.page ?? "1") || 1);
+  const status = resolvedSearchParams.status;
+  const message = resolvedSearchParams.message;
   const where = q
     ? {
         OR: [
@@ -187,6 +229,19 @@ export default async function AdminOrdersPage({
 
   return (
     <section className="py-4">
+      {/* Status Message */}
+      {status && message && (
+        <div
+          className={`mb-4 rounded-xl px-4 py-3 text-sm font-medium ${
+            status === "error"
+              ? "border border-red-200 bg-red-50 text-red-800"
+              : "border border-green-200 bg-green-50 text-green-800"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -335,6 +390,7 @@ export default async function AdminOrdersPage({
                       Update
                     </button>
                   </form>
+                  <DeleteOrderButton orderId={order.id} onDelete={deleteOrder} />
                 </div>
               </div>
 

@@ -47,7 +47,7 @@ export async function Header() {
             <BrandLogo size="header" />
             <div className="hidden min-w-0 lg:block">
               <span className="block truncate font-serif text-lg tracking-wide text-studio-ink">
-                Vasireddy Designer Studio
+                Vasireddy's Designer Studio
               </span>
              <span className="block text-[10px]  tracking-[0.25em] text-studio-gold italic font-light opacity-90">
   Your Desire Our Design

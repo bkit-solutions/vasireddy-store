@@ -254,6 +254,42 @@ async function deleteProduct(formData: FormData) {
   if (!productId) return;
 
   try {
+    // Check if product is referenced by any orders
+    const ordersWithProduct = await prisma.orderItem.findMany({
+      where: { productId },
+      include: {
+        order: {
+          select: {
+            id: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+      take: 5,
+    });
+
+    if (ordersWithProduct.length > 0) {
+      const orderCount = await prisma.orderItem.count({
+        where: { productId },
+      });
+      const orderIds = ordersWithProduct.map((oi) => oi.order.id);
+      const orderInfo = ordersWithProduct
+        .map((oi) => `#${oi.order.id.slice(-8).toUpperCase()} (${oi.order.user.name})`)
+        .join(", ");
+
+      const message =
+        orderCount > 5
+          ? `Product is referenced by ${orderCount} orders (including: ${orderInfo}...). Delete all associated orders first from the Orders page.`
+          : `Product is referenced by ${orderCount} order${orderCount > 1 ? "s" : ""}: ${orderInfo}. Delete these orders first from the Orders page.`;
+
+      redirect(buildRedirect({ status: "error", message }));
+    }
+
     // Delete S3 images first
     await deleteProductImages(productId);
 
@@ -278,7 +314,7 @@ async function deleteProduct(formData: FormData) {
     redirect(
       buildRedirect({
         status: "error",
-        message: "Could not delete product. It may be referenced by existing orders.",
+        message: "Could not delete product. It may be referenced by existing orders. Delete those orders first from the Orders page.",
       })
     );
   }

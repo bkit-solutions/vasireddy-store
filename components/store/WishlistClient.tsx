@@ -52,8 +52,8 @@ export function WishlistClient({ initialItems }: WishlistClientProps) {
     <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
         <article key={item.id} className="rounded-2xl border border-studio-primary/10 bg-white p-4 shadow-[0_16px_30px_-24px_rgba(63,52,143,0.55)]">
-          <div className="relative h-48 overflow-hidden rounded-xl bg-studio-light">
-            {item.product.imageUrl ? <img src={item.product.imageUrl} alt={item.product.name} className="h-full w-full object-cover" /> : null}
+          <div className="relative w-full aspect-square overflow-hidden rounded-xl bg-studio-light flex items-center justify-center">
+            {item.product.imageUrl ? <img src={item.product.imageUrl} alt={item.product.name} className="h-full w-full object-contain" /> : null}
           </div>
           <p className="mt-4 text-xs uppercase tracking-[0.14em] text-studio-accent">{item.product.category.name}</p>
           <h3 className="mt-1 text-lg font-semibold text-studio-primary">{item.product.name}</h3>

@@ -15,8 +15,8 @@ type ProductCardProps = {
 export function ProductCard({ id, name, slug, imageUrl, category, price }: ProductCardProps) {
   return (
     <article className="animate-reveal-up rounded-2xl border border-studio-primary/10 bg-white p-4 shadow-[0_16px_30px_-24px_rgba(32,29,26,0.24)] transition hover:-translate-y-1">
-      <div className="relative h-52 overflow-hidden rounded-xl bg-studio-light">
-        {imageUrl ? <img src={imageUrl} alt={name} className="h-full w-full object-cover" /> : null}
+      <div className="relative w-full aspect-square overflow-hidden rounded-xl bg-studio-light flex items-center justify-center">
+        {imageUrl ? <img src={imageUrl} alt={name} className="h-full w-full object-contain" /> : null}
       </div>
       <div className="mt-4 flex items-start justify-between gap-3">
         <div>
