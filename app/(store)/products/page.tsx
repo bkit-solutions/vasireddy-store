@@ -43,10 +43,10 @@ export default async function ProductsPage({
       <div className="animate-reveal-up rounded-3xl border border-studio-primary/10 bg-white/90 p-6 shadow-[0_20px_42px_-30px_rgba(32,29,26,0.3)] backdrop-blur md:p-8">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold leading-tight text-studio-primary md:text-5xl">
-            All Products
+            Shop All Products
           </h1>
           <p className="max-w-2xl text-sm text-studio-ink/70 md:text-base">
-            Search, filter, and shop individual products. For style-first browsing, use the Collections page.
+            Find what you're looking for with powerful search and sorting. Prefer curated browsing? <Link href="/collections" className="font-semibold text-studio-accent hover:text-studio-primary transition">Visit Collections</Link>.
           </p>
         </div>
 

@@ -181,7 +181,7 @@ Password: Admin@123
 **Homepage (`/`)**
 - Displays featured categories, latest arrivals, trending picks, and featured products
 - Shortcut banners for the wedding collection and festive collection
-- Free shipping, premium quality, and easy returns info bar
+- Free shipping and premium quality info bar
 - WhatsApp button (bottom-right) for direct support chat
 
 **Collections (`/collections`)**
@@ -199,7 +199,7 @@ Password: Admin@123
 - Shows product image, name, category, price, description
 - Context-aware product specs (saree dimensions, blouse silhouette, etc.)
 - Styling notes tailored to the product type
-- Trust badges: Premium Quality · 7-Day Returns · Secure Checkout
+- Trust badges: Premium Quality · Secure Checkout
 - **Add to Cart** and **Save to Wishlist** buttons
 
 ### Cart (`/cart`)

@@ -113,10 +113,6 @@ export function LoginForm({ title, subtitle, adminOnly = false, callbackUrl = "/
               <Link href="/register" className="font-semibold text-studio-primary hover:text-studio-accent">
                 Register
               </Link>
-              {" · "}
-              <Link href="/admin/login" className="font-semibold text-studio-primary hover:text-studio-accent">
-                Admin login
-              </Link>
             </>
           )}
         </p>

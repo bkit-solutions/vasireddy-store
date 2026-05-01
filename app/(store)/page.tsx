@@ -1,11 +1,9 @@
-import { CategoryGrid } from "@/components/store/CategoryGrid";
 import { Hero } from "@/components/store/Hero";
 import { ProductCard } from "@/components/store/ProductCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getActiveProducts, getStoreCategories, type StoreProduct } from "@/lib/store-data";
+import { getActiveProducts, type StoreProduct } from "@/lib/store-data";
 import {
   Gem,
-  RefreshCw,
   ShieldCheck,
   Sparkles,
   Truck,
@@ -17,10 +15,7 @@ import {
 import Link from "next/link";
 
 export default async function StoreHomePage() {
-  const [categories, products] = (await Promise.all([
-    getStoreCategories(),
-    getActiveProducts({ take: 9 }),
-  ])) as [Awaited<ReturnType<typeof getStoreCategories>>, StoreProduct[]];
+  const products = (await getActiveProducts({ take: 9 })) as StoreProduct[];
 
   const latest = products.slice(0, 3);
   const trending = products.slice(3, 6);
@@ -36,7 +31,7 @@ export default async function StoreHomePage() {
           {[
             { icon: Truck, title: "Free Shipping", description: "On orders above ₹1999" },
             { icon: ShieldCheck, title: "Premium Quality", description: "Curated fabrics and finish" },
-            { icon: RefreshCw, title: "Easy Returns", description: "7-day return support" },
+            { icon: Award, title: "Secure Checkout", description: "100% safe & encrypted" },
           ].map((item) => (
             <div
               key={item.title}
@@ -52,34 +47,6 @@ export default async function StoreHomePage() {
             </div>
           ))}
         </div>
-      </section>
-
-      {/* ─────────── CATEGORIES ─────────── */}
-      <section className="section-shell mt-16 animate-reveal-up">
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="h-px w-8 bg-studio-accent" />
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-studio-accent">
-                Explore Collections
-              </p>
-            </div>
-            <h2 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-studio-primary md:text-4xl">
-              Shop Categories
-            </h2>
-            <p className="mt-2 text-sm text-studio-ink/70 md:text-base">
-              Designed for every milestone and memory.
-            </p>
-          </div>
-          <Link
-            href="/collections"
-            className="group hidden shrink-0 items-center gap-2 rounded-full border border-studio-primary/20 bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-studio-primary transition-all hover:border-studio-primary hover:bg-studio-primary hover:text-white sm:inline-flex"
-          >
-            View All
-            <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-        <CategoryGrid categories={categories} />
       </section>
 
       {/* ─────────── LATEST ARRIVALS ─────────── */}
@@ -197,135 +164,126 @@ export default async function StoreHomePage() {
         </div>
       </section>
 
-      {/* ─────────── WHY CHOOSE US ─────────── */}
-      <section className="section-shell mt-20">
-        <div className="relative overflow-hidden rounded-[2rem] border border-studio-primary/10 bg-gradient-to-br from-white via-studio-light/30 to-white p-6 shadow-[0_24px_50px_-34px_rgba(63,52,143,0.6)] md:p-10">
-          {/* Decorative elements */}
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-studio-accent/10 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-studio-primary/5 blur-3xl" />
-
-          <div className="relative">
-            <div className="mb-10 text-center">
-              <div className="inline-flex items-center gap-2">
-                <span className="h-px w-8 bg-studio-accent" />
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-studio-accent">
-                  The Promise
-                </p>
-                <span className="h-px w-8 bg-studio-accent" />
-              </div>
-              <h2 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-studio-primary md:text-4xl">
-                Why Choose Us
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-sm text-studio-ink/70 md:text-base">
-                Designed to feel couture from browse to delivery.
-              </p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              {[
-                {
-                  icon: Gem,
-                  title: "Artisan Craft",
-                  text: "Hand-finished sarees and blouses with embroidery and festive detailing.",
-                  color: "from-studio-primary to-studio-primary/70",
-                },
-                {
-                  icon: ShieldCheck,
-                  title: "QC Before Dispatch",
-                  text: "Each product is measured, inspected, and packed by our studio team.",
-                  color: "from-studio-accent to-studio-accent/70",
-                },
-                {
-                  icon: Sparkles,
-                  title: "Style Assistance",
-                  text: "Get WhatsApp-ready styling support for blouses, pairings, and occasions.",
-                  color: "from-emerald-500 to-emerald-600",
-                },
-              ].map((item) => (
-                <article
-                  key={item.title}
-                  className="group relative overflow-hidden rounded-2xl border border-studio-primary/10 bg-white p-6 shadow-[0_14px_30px_-24px_rgba(63,52,143,0.6)] transition-all hover:-translate-y-1 hover:shadow-[0_20px_40px_-24px_rgba(63,52,143,0.75)]"
-                >
-                  <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${item.color} text-white shadow-md transition-transform group-hover:scale-110`}
-                  >
-                    <item.icon size={22} />
-                  </div>
-                  <h3 className="mt-5 text-lg font-semibold text-studio-primary">
-                    {item.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-studio-ink/75">{item.text}</p>
-                </article>
-              ))}
-            </div>
-
-            {/* Stats */}
-            <div className="mt-8 grid gap-3 sm:grid-cols-4">
-              {[
-                { value: "5000+", label: "Happy Customers", icon: Heart },
-                { value: "48h", label: "Dispatch Window", icon: Truck },
-                { value: "7 Days", label: "Easy Returns", icon: RefreshCw },
-                { value: "4.8★", label: "Avg Rating", icon: Award },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="group relative overflow-hidden rounded-2xl border border-studio-primary/10 bg-white/75 px-4 py-4 text-center backdrop-blur transition-all hover:-translate-y-0.5 hover:border-studio-accent/30 hover:shadow-md"
-                >
-                  <stat.icon
-                    className="mx-auto mb-2 text-studio-accent/70 transition-transform group-hover:scale-110"
-                    size={18}
-                  />
-                  <p className="font-serif text-2xl font-semibold text-studio-primary md:text-3xl">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-studio-ink/60">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
+      {/* ─────────── WHY CHOOSE US - REDESIGNED ─────────── */}
+      <section className="section-shell mt-24 animate-reveal-up">
+        {/* Header */}
+        <div className="mb-16 text-center">
+          <div className="inline-flex items-center gap-3 rounded-full bg-studio-accent/10 px-4 py-2 backdrop-blur">
+            <div className="h-2 w-2 rounded-full bg-studio-accent" />
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-studio-accent">
+              Quality & Craftsmanship
+            </p>
           </div>
+          <h2 className="mt-5 font-serif text-4xl font-semibold tracking-tight text-studio-primary md:text-5xl">
+            Why Vasireddy
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-base text-studio-ink/70 md:text-lg">
+            Every piece tells a story of heritage, artistry, and meticulous attention to detail.
+          </p>
         </div>
-      </section>
 
-      {/* ─────────── NEWSLETTER CTA ─────────── */}
-      <section className="section-shell mt-16">
-        <div className="relative overflow-hidden rounded-3xl bg-studio-primary px-6 py-10 text-white shadow-[0_30px_55px_-30px_rgba(63,52,143,0.9)] md:px-12 md:py-14">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-60 w-60 rounded-full bg-studio-accent/30 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-white/5 blur-3xl" />
-
-          <div className="relative grid gap-6 md:grid-cols-2 md:items-center">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] backdrop-blur">
-                <Sparkles size={12} />
-                Join the Studio
-              </span>
-              <h3 className="mt-4 font-serif text-3xl font-semibold leading-tight md:text-4xl">
-                Be the first to know <br className="hidden md:block" />
-                about new drops
-              </h3>
-              <p className="mt-3 max-w-md text-sm text-white/80 md:text-base">
-                Subscribe for early access to festive edits, styling tips, and exclusive member-only offers.
-              </p>
-            </div>
-
-            <form className="flex w-full flex-col gap-3 sm:flex-row">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm text-white placeholder:text-white/50 backdrop-blur focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
-              />
-              <button
-                type="submit"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3 text-xs font-semibold uppercase tracking-[0.15em] text-studio-primary transition-all hover:bg-studio-light"
+        {/* Three Feature Cards - Full Width with Visual Appeal */}
+        <div className="grid gap-6 lg:grid-cols-3 mb-16">
+          {[
+            {
+              icon: Gem,
+              title: "Artisan Heritage",
+              description: "Hand-finished sarees and blouses crafted with traditional techniques",
+              details: "Exclusive zari work, silk threads, and handcrafted embroidery for timeless elegance.",
+              highlights: ["Traditional Zari Work", "Premium Silk Threads", "Festive Detailing"],
+              bgGradient: "from-studio-primary/5 to-studio-accent/5",
+              iconBg: "from-studio-primary to-studio-primary/70",
+            },
+            {
+              icon: ShieldCheck,
+              title: "Quality Assurance",
+              description: "Rigorous inspection at every step of production",
+              details: "Each piece is measured, inspected, and carefully packed by our expert studio team.",
+              highlights: ["Pre-Dispatch QC", "Perfect Fit Guarantee", "Expert Packaging"],
+              bgGradient: "from-studio-accent/5 to-emerald-500/5",
+              iconBg: "from-studio-accent to-studio-accent/70",
+            },
+            {
+              icon: Sparkles,
+              title: "Style Support",
+              description: "Personal styling guidance for your perfect look",
+              details: "Get WhatsApp-ready expert advice on styling, pairings, and occasion-specific recommendations.",
+              highlights: ["Live Styling Tips", "Pairing Suggestions", "Occasion Guidance"],
+              bgGradient: "from-emerald-500/5 to-studio-primary/5",
+              iconBg: "from-emerald-500 to-emerald-600",
+            },
+          ].map((item) => (
+            <article
+              key={item.title}
+              className={`group relative overflow-hidden rounded-2xl border border-studio-primary/10 bg-gradient-to-br ${item.bgGradient} p-8 backdrop-blur transition-all duration-300 hover:-translate-y-2 hover:border-studio-accent/30 hover:shadow-[0_24px_48px_-24px_rgba(63,52,143,0.6)]`}
+            >
+              {/* Icon */}
+              <div
+                className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${item.iconBg} text-white shadow-lg transition-transform duration-300 group-hover:scale-110`}
               >
-                Subscribe
-                <ArrowRight size={14} />
-              </button>
-            </form>
+                <item.icon size={28} />
+              </div>
+
+              {/* Content */}
+              <h3 className="mt-6 text-xl font-semibold text-studio-primary">{item.title}</h3>
+              <p className="mt-2 text-sm font-medium text-studio-ink/70">{item.description}</p>
+              <p className="mt-3 text-sm leading-6 text-studio-ink/65">{item.details}</p>
+
+              {/* Highlights */}
+              <ul className="mt-6 space-y-2">
+                {item.highlights.map((highlight) => (
+                  <li key={highlight} className="flex items-center gap-3 text-xs font-medium text-studio-ink/70">
+                    <span className="h-1.5 w-1.5 rounded-full bg-studio-accent" />
+                    {highlight}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+
+        {/* Stats Section - Redesigned */}
+        <div className="relative overflow-hidden rounded-2xl border border-studio-accent/20 bg-gradient-to-r from-studio-primary/5 via-white to-studio-accent/5 p-8 md:p-12">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-40 w-40 rounded-full bg-studio-accent/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-studio-primary/10 blur-3xl" />
+
+          <div className="relative grid gap-8 sm:grid-cols-3">
+            {[
+              {
+                icon: Heart,
+                value: "5000+",
+                label: "Happy Customers",
+                subtext: "Trusted by brides and celebration lovers",
+              },
+              {
+                icon: Truck,
+                value: "48h",
+                label: "Express Dispatch",
+                subtext: "Quick turnaround on orders",
+              },
+              {
+                icon: Award,
+                value: "4.8★",
+                label: "Average Rating",
+                subtext: "Consistently loved by our community",
+              },
+            ].map((stat) => (
+              <div key={stat.label} className="flex flex-col items-center text-center">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-studio-accent/20 text-studio-accent transition-transform duration-300 hover:scale-110">
+                  <stat.icon size={24} />
+                </div>
+                <p className="mt-4 font-serif text-3xl font-semibold text-studio-primary md:text-4xl">
+                  {stat.value}
+                </p>
+                <p className="mt-2 font-semibold text-sm text-studio-ink/80">{stat.label}</p>
+                <p className="mt-1 text-xs text-studio-ink/60">{stat.subtext}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
+
+
     </div>
   );
 }

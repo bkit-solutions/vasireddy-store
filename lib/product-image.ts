@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { isS3Configured, uploadToS3 } from "@/lib/s3-uploader";
 
-const MAX_IMAGE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
+const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024; // 8MB - aligned with Next.js bodySizeLimit
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function getFileExtension(mimeType: string) {

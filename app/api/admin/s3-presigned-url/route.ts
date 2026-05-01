@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     });
 
     const presignedUrl = await getSignedUrl(s3Client, putCommand, {
-      expiresIn: 3600,
+      expiresIn: 7200, // 2 hours for better upload time allowance
     });
 
     // Public URL

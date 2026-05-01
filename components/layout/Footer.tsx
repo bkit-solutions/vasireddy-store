@@ -46,9 +46,6 @@ export function Footer() {
                   Bridal Edit Weekly
                 </span>
                 <span className="rounded-full border border-studio-primary/15 bg-studio-light/40 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-studio-primary">
-                  7 Day Returns
-                </span>
-                <span className="rounded-full border border-studio-primary/15 bg-studio-light/40 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-studio-primary">
                   Secure Checkout
                 </span>
               </div>
@@ -79,7 +76,7 @@ export function Footer() {
                   Style Support
                 </p>
                 <p className="mt-2 text-sm leading-6 text-studio-ink/70">
-                  Available Monday to Saturday,<br />10 AM to 7 PM.
+                  Available Monday to Sunday,<br />10 AM to 7 PM.
                 </p>
               </div>
             </div>
@@ -108,10 +105,10 @@ export function Footer() {
                     Phone
                   </span>
                   <a
-                    href="tel:+919951677333"
+                    href="tel:+919502704241"
                     className="text-sm text-studio-ink/80 transition hover:text-studio-accent"
                   >
-                    +91 99516 77333
+                    +91 9502704241
                   </a>
                 </div>
               </div>

@@ -57,10 +57,6 @@ export default async function CartPage() {
               <Truck className="h-5 w-5 text-studio-primary/70" />
               <span className="text-xs text-studio-ink/60">Fast delivery</span>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <RefreshCw className="h-5 w-5 text-studio-primary/70" />
-              <span className="text-xs text-studio-ink/60">Easy returns</span>
-            </div>
           </div>
         </div>
       </section>
@@ -168,15 +164,6 @@ export default async function CartPage() {
               <div>
                 <p className="text-sm font-semibold text-studio-primary">Free Shipping</p>
                 <p className="text-xs text-studio-ink/60">On orders over $100</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 rounded-2xl bg-studio-primary/[0.03] px-5 py-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white">
-                <RefreshCw className="h-5 w-5 text-studio-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-studio-primary">Easy Returns</p>
-                <p className="text-xs text-studio-ink/60">30-day return policy</p>
               </div>
             </div>
           </div>

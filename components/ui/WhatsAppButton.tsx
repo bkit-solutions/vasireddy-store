@@ -1,7 +1,7 @@
 "use client";
 
 // Replace with the actual WhatsApp business number (country code + number, no + or spaces)
-const WHATSAPP_NUMBER = "+919951677333";
+const WHATSAPP_NUMBER = "+919502704241";
 const DEFAULT_MESSAGE = "Hi, I came across Vasireddy Designer Studio and would love to know more about your collection!";
 
 export function WhatsAppButton() {
