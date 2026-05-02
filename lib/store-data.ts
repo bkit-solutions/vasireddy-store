@@ -205,12 +205,12 @@ export async function searchProducts(query: string, options?: { limit?: number; 
           }
         : {}),
       OR: [
-        { name: { contains: q, mode: "insensitive" } },
-        { description: { contains: q, mode: "insensitive" } },
-        { sku: { contains: q, mode: "insensitive" } },
+        { name: { contains: q } },
+        { description: { contains: q } },
+        { sku: { contains: q } },
         {
           category: {
-            name: { contains: q, mode: "insensitive" },
+            name: { contains: q },
           },
         },
       ],
