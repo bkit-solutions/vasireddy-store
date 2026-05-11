@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { UserRole } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
-import { sendOfferAnnouncementEmail } from "@/lib/mailer";
 import { uploadProductImage } from "@/lib/product-image";
 import { deleteProductImages } from "@/lib/s3-utils";
 import { formatCurrency } from "@/lib/utils";
@@ -16,30 +15,7 @@ type ActionState = {
   message: string;
 };
 
-async function notifyCustomersAboutProductUpdate(input: {
-  subject: string;
-  heading: string;
-  message: string;
-}) {
-  try {
-    const recipients = await prisma.user.findMany({
-      where: { role: UserRole.CUSTOMER },
-      select: { email: true },
-    });
 
-    const recipientEmails = recipients.map((u) => u.email).filter(Boolean);
-    if (recipientEmails.length === 0) return;
-
-    await sendOfferAnnouncementEmail({
-      recipients: recipientEmails,
-      subject: input.subject,
-      heading: input.heading,
-      message: input.message,
-    });
-  } catch (error) {
-    console.error("Failed to send product update notifications", error);
-  }
-}
 
 /**
  * Resolve product image URL from either uploaded file or input URL
@@ -90,6 +66,7 @@ async function createProduct(formData: FormData) {
   const priceInRupees = Number(formData.get("price") ?? 0);
   const stock = Number(formData.get("stock") ?? 0);
   const categoryId = String(formData.get("categoryId") ?? "").trim();
+  const isTrending = formData.get("isTrending") === "true";
 
   if (
     !name ||
@@ -119,14 +96,11 @@ async function createProduct(formData: FormData) {
         categoryId,
         imageUrl,
         isActive: true,
+        isTrending,
       },
     });
 
-    await notifyCustomersAboutProductUpdate({
-      subject: `New Arrival: ${name}`,
-      heading: "A new product has arrived",
-      message: `${name} is now live in our store. Explore the latest collection and grab your favorite look.`,
-    });
+
   } catch (error) {
     console.error("Create product failed", error);
     const msg =
@@ -153,6 +127,7 @@ async function updateProduct(formData: FormData) {
   const priceInRupees = Number(formData.get("price") ?? 0);
   const stock = Number(formData.get("stock") ?? 0);
   const categoryId = String(formData.get("categoryId") ?? "").trim();
+  const isTrending = formData.get("isTrending") === "true";
 
   if (
     !productId ||
@@ -179,6 +154,7 @@ async function updateProduct(formData: FormData) {
       basePrice: Math.round(priceInRupees * 100),
       stock: Number.isFinite(stock) ? Math.max(0, Math.round(stock)) : 0,
       categoryId,
+      isTrending,
     };
 
     // Only update image if a new one is provided
@@ -191,11 +167,7 @@ async function updateProduct(formData: FormData) {
       data: updateData,
     });
 
-    await notifyCustomersAboutProductUpdate({
-      subject: `Updated Product: ${name}`,
-      heading: "Product details updated",
-      message: `${name} has fresh updates in pricing, stock, or details. Check it out in our store.`,
-    });
+
   } catch (error) {
     console.error("Update product failed", error);
     redirect(buildRedirect({ status: "error", message: "Could not update product." }));
@@ -221,15 +193,7 @@ async function toggleProductStatus(formData: FormData) {
       select: { name: true },
     });
 
-    await notifyCustomersAboutProductUpdate({
-      subject: nextValue
-        ? `Back in Store: ${updatedProduct.name}`
-        : `Product Update: ${updatedProduct.name}`,
-      heading: nextValue ? "Product is now available" : "Product availability updated",
-      message: nextValue
-        ? `${updatedProduct.name} is active again and ready to shop.`
-        : `${updatedProduct.name} is currently unavailable. Stay tuned for upcoming offers and restocks.`,
-    });
+
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
@@ -244,6 +208,29 @@ async function toggleProductStatus(formData: FormData) {
     if ((error as { digest?: string })?.digest?.startsWith?.("NEXT_REDIRECT")) throw error;
     console.error("Toggle failed", error);
     redirect(buildRedirect({ status: "error", message: "Could not change status." }));
+  }
+}
+
+async function toggleTrendingStatus(formData: FormData) {
+  "use server";
+
+  const productId = String(formData.get("productId") ?? "");
+  const nextValue = String(formData.get("nextValue") ?? "") === "true";
+  if (!productId) return;
+
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: { isTrending: nextValue },
+    });
+
+    revalidatePath("/admin/products");
+    revalidatePath("/");
+    redirect(buildRedirect({ status: "success", message: nextValue ? "Product added to trending." : "Product removed from trending." }));
+  } catch (error) {
+    if ((error as { digest?: string })?.digest?.startsWith?.("NEXT_REDIRECT")) throw error;
+    console.error("Toggle trending failed", error);
+    redirect(buildRedirect({ status: "error", message: "Could not update trending status." }));
   }
 }
 
@@ -298,11 +285,7 @@ async function deleteProduct(formData: FormData) {
       select: { name: true },
     });
 
-    await notifyCustomersAboutProductUpdate({
-      subject: `Catalog Update from Vasireddy Designer Studio`,
-      heading: "Catalog changes are live",
-      message: `${deletedProduct.name} has been removed from the active catalog. Explore our latest arrivals and offers for alternatives.`,
-    });
+
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
@@ -455,8 +438,7 @@ export default async function AdminProductsPage({
         </summary>
         <form
           action={createProduct}
-          encType="multipart/form-data"
-          className="grid gap-3 border-t border-studio-primary/10 p-4 sm:p-5 md:grid-cols-2"
+          className="grid gap-6 border-t border-studio-primary/10 bg-white p-6 sm:p-8 md:grid-cols-2"
         >
           <Field label="Name" required>
             <input
@@ -509,6 +491,12 @@ export default async function AdminProductsPage({
                 </option>
               ))}
             </select>
+          </Field>
+          <Field label="Trending Product">
+            <div className="flex items-center gap-2 pt-2">
+              <input type="checkbox" name="isTrending" value="true" className="h-4 w-4 rounded border-studio-primary/15 text-studio-accent focus:ring-studio-accent" />
+              <span className="text-xs text-studio-ink/60">Show on homepage trending list</span>
+            </div>
           </Field>
           <Field label="Image URL (optional)" className="md:col-span-2">
             <input
@@ -605,6 +593,11 @@ export default async function AdminProductsPage({
                           Low stock
                         </span>
                       ) : null}
+                      {product.isTrending && (
+                        <span className="rounded-full bg-studio-accent/10 px-2 py-0.5 text-[10px] font-semibold text-studio-accent border border-studio-accent/20">
+                          Trending
+                        </span>
+                      )}
                     </div>
                     <h3 className="mt-1 break-words text-base font-semibold text-studio-primary sm:text-lg">
                       {product.name}
@@ -634,6 +627,24 @@ export default async function AdminProductsPage({
                       {product.isActive ? "Deactivate" : "Activate"}
                     </button>
                   </form>
+                  <form action={toggleTrendingStatus}>
+                    <input type="hidden" name="productId" value={product.id} />
+                    <input
+                      type="hidden"
+                      name="nextValue"
+                      value={String(!product.isTrending)}
+                    />
+                    <button
+                      type="submit"
+                      className={`w-full rounded-full px-4 py-2 text-xs font-semibold transition ${
+                        product.isTrending
+                          ? "bg-studio-accent text-white shadow-sm hover:bg-studio-primary"
+                          : "border border-studio-primary/20 text-studio-primary hover:bg-studio-light"
+                      }`}
+                    >
+                      {product.isTrending ? "Untrend" : "Set Trending"}
+                    </button>
+                  </form>
                   <form action={deleteProduct}>
                     <input type="hidden" name="productId" value={product.id} />
                     <button
@@ -653,8 +664,7 @@ export default async function AdminProductsPage({
                 </summary>
                 <form
                   action={updateProduct}
-                  encType="multipart/form-data"
-                  className="mt-3 grid gap-3 md:grid-cols-2"
+                  className="mt-4 grid gap-6 border-t border-studio-primary/5 pt-4 md:grid-cols-2"
                 >
                   <input type="hidden" name="productId" value={product.id} />
                   <Field label="Name">
@@ -714,6 +724,18 @@ export default async function AdminProductsPage({
                         </option>
                       ))}
                     </select>
+                  </Field>
+                  <Field label="Trending Status">
+                    <div className="flex items-center gap-2 pt-2">
+                      <input 
+                        type="checkbox" 
+                        name="isTrending" 
+                        value="true" 
+                        defaultChecked={product.isTrending}
+                        className="h-4 w-4 rounded border-studio-primary/15 text-studio-accent focus:ring-studio-accent" 
+                      />
+                      <span className="text-xs text-studio-ink/60">Show in Trending Now</span>
+                    </div>
                   </Field>
                   <Field label="Image URL" className="md:col-span-2">
                     <input

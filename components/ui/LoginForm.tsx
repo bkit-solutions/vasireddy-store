@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { getSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
 
 type LoginFormProps = {
   title: string;
@@ -15,8 +16,8 @@ type LoginFormProps = {
 export function LoginForm({ title, subtitle, adminOnly = false, callbackUrl = "/" }: LoginFormProps) {
   const router = useRouter();
 
-  const [email, setEmail] = useState(adminOnly ? "admin@vasireddydesigner.com" : "");
-  const [password, setPassword] = useState(adminOnly ? "Admin@123" : "");
+  const [email, setEmail] = useState(adminOnly ? "vasireddydesigners@gmail.com" : "");
+  const [password, setPassword] = useState(adminOnly ? "Vasavi@4241" : "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,66 +57,102 @@ export function LoginForm({ title, subtitle, adminOnly = false, callbackUrl = "/
   }
 
   return (
-    <section className="section-shell py-10 md:py-14">
-      <div className="mx-auto max-w-md rounded-3xl border border-studio-primary/10 bg-white/90 p-6 shadow-[0_24px_44px_-28px_rgba(63,52,143,0.65)] backdrop-blur md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-studio-accent">Secure Access</p>
-        <h1 className="text-3xl font-semibold text-studio-primary">{title}</h1>
-        <p className="mt-2 text-sm text-studio-ink/75">{subtitle}</p>
+    <section className="flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-12">
+      <div className="animate-reveal-up w-full max-w-md">
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-studio-primary/10 bg-white/80 p-8 shadow-[0_32px_64px_-16px_rgba(63,52,143,0.2)] backdrop-blur-xl md:p-10">
+          {/* Decorative element */}
+          <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-studio-primary/5 blur-2xl" />
+          <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-studio-accent/5 blur-2xl" />
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.12em] text-studio-ink/70" htmlFor="email">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-studio-primary/15 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-studio-accent"
-            />
+          <div className="relative">
+            <div className="mb-8 text-center">
+              <span className="studio-pill mb-3 inline-block">Secure Access</span>
+              <h1 className="text-4xl font-semibold tracking-tight text-studio-primary">{title}</h1>
+              <p className="mt-3 text-balance text-sm leading-relaxed text-studio-ink/60">{subtitle}</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] text-studio-ink/50" htmlFor="email">
+                  <Mail className="h-3 w-3" />
+                  Email Address
+                </label>
+                <div className="group relative">
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="Enter your email"
+                    className="w-full rounded-2xl border border-studio-primary/10 bg-white/50 px-4 py-3.5 text-sm outline-none transition-all duration-300 focus:border-studio-accent focus:bg-white focus:ring-4 focus:ring-studio-accent/5"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.15em] text-studio-ink/50" htmlFor="password">
+                    <Lock className="h-3 w-3" />
+                    Password
+                  </label>
+                  {!adminOnly && (
+                    <Link
+                      href="/forgot-password"
+                      className="text-[10px] font-bold uppercase tracking-wider text-studio-accent transition-colors hover:text-studio-primary"
+                    >
+                      Forgot Password?
+                    </Link>
+                  )}
+                </div>
+                <div className="group relative">
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-2xl border border-studio-primary/10 bg-white/50 px-4 py-3.5 text-sm outline-none transition-all duration-300 focus:border-studio-accent focus:bg-white focus:ring-4 focus:ring-studio-accent/5"
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="flex items-center gap-2 rounded-xl border border-red-100 bg-red-50 p-3 text-xs font-medium text-red-600">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-studio-primary px-6 py-4 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-1 hover:bg-studio-accent hover:shadow-lg active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <span className="relative z-10">{loading ? "Authenticating..." : "Sign In to Account"}</span>
+                {!loading && <ArrowRight className="relative z-10 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />}
+              </button>
+            </form>
+
+            <div className="mt-10 border-t border-studio-primary/5 pt-6 text-center">
+              <p className="text-xs font-medium text-studio-ink/50">
+                {adminOnly ? (
+                  <Link href="/login" className="text-studio-primary transition-colors hover:text-studio-accent">
+                    ← Back to customer portal
+                  </Link>
+                ) : (
+                  <>
+                    Don&apos;t have an account?{" "}
+                    <Link href="/register" className="font-bold text-studio-primary transition-colors hover:text-studio-accent">
+                      Create one now
+                    </Link>
+                  </>
+                )}
+              </p>
+            </div>
           </div>
-
-          <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.12em] text-studio-ink/70" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="mt-1 w-full rounded-xl border border-studio-primary/15 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-studio-accent"
-            />
-          </div>
-
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-full bg-studio-primary px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-studio-accent disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
-
-        <p className="mt-5 text-xs text-studio-ink/70">
-          {adminOnly ? (
-            <Link href="/login" className="font-semibold text-studio-primary hover:text-studio-accent">
-              Back to customer login
-            </Link>
-          ) : (
-            <>
-              New customer?{" "}
-              <Link href="/register" className="font-semibold text-studio-primary hover:text-studio-accent">
-                Register
-              </Link>
-            </>
-          )}
-        </p>
+        </div>
       </div>
     </section>
   );

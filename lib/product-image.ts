@@ -3,7 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { isS3Configured, uploadToS3 } from "@/lib/s3-uploader";
 
-const MAX_IMAGE_SIZE_BYTES = 8 * 1024 * 1024; // 8MB - aligned with Next.js bodySizeLimit
+const MAX_IMAGE_SIZE_BYTES = 100 * 1024 * 1024; // 100MB
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function getFileExtension(mimeType: string) {
@@ -43,7 +43,7 @@ export async function uploadProductImage(file: File, productId?: string) {
   }
 
   if (file.size > MAX_IMAGE_SIZE_BYTES) {
-    throw new Error(`Image size must be ${MAX_IMAGE_SIZE_BYTES / (1024 * 1024)}MB or smaller.`);
+    throw new Error(`Image size must be 100MB or smaller.`);
   }
 
   // Use S3 if configured

@@ -8,6 +8,7 @@ import { authOptions } from "@/lib/auth";
 import { sendOrderStatusUpdateEmail } from "@/lib/mailer";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
+import { AddressManager } from "@/components/store/AddressManager";
 
 const statusStyles: Record<OrderStatus, { badge: string; dot: string }> = {
   PENDING: { badge: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
@@ -152,7 +153,7 @@ export default async function AccountPage({
   const requestedPage = Math.max(1, Number(resolvedSearchParams?.page ?? "1") || 1);
   const where = { userId: session.user.id };
 
-  const [totalOrders, deliveredCount, totalSpendAggregate, latestOrder] = await Promise.all([
+  const [totalOrders, deliveredCount, totalSpendAggregate, latestOrder, addresses] = await Promise.all([
     prisma.order.count({ where }),
     prisma.order.count({
       where: {
@@ -167,6 +168,10 @@ export default async function AccountPage({
     prisma.order.findFirst({
       where,
       orderBy: { createdAt: "desc" },
+    }),
+    prisma.address.findMany({
+      where: { userId: session.user.id },
+      orderBy: { isDefault: "desc" },
     }),
   ]);
 
@@ -275,6 +280,11 @@ export default async function AccountPage({
               </p>
             </div>
           ))}
+        </div>
+
+        {/* ─── Address Management ─── */}
+        <div className="border-t border-studio-primary/10 p-6 md:p-8">
+           <AddressManager initialAddresses={addresses} />
         </div>
 
         {/* ─── Order History Section ─── */}

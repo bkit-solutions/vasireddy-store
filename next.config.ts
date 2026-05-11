@@ -9,16 +9,15 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
+      {
+        protocol: "https",
+        hostname: "vasireddy-products-images.s3.ap-south-2.amazonaws.com",
+      },
     ],
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: "8mb",
-    },
-  },
-  api: {
-    bodyParser: {
-      sizeLimit: "8mb",
+      bodySizeLimit: "100mb",
     },
   },
 };

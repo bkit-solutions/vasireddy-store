@@ -13,8 +13,8 @@ const s3Client = new S3Client({
 
 const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME || "";
 const CLOUDFRONT_URL = process.env.AWS_CLOUDFRONT_URL || "";
-const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB - aligned with Next.js bodySizeLimit
-const MAX_IMAGES_PER_PRODUCT = 5;
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_IMAGES_PER_PRODUCT = 100;
 const ALLOWED_FORMATS = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export interface S3UploadResponse {
@@ -115,7 +115,7 @@ export async function uploadToS3(
 
   // Validate file size
   if (file.size > MAX_FILE_SIZE) {
-    throw new Error(`Image size must be ${MAX_FILE_SIZE / (1024 * 1024)}MB or smaller.`);
+    throw new Error(`Image size must be 100MB or smaller.`);
   }
 
   // Check image count

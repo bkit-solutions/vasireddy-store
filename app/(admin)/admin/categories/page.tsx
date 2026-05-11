@@ -1,5 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { uploadProductImage } from "@/lib/product-image";
+import { randomUUID } from "crypto";
 
 // ── Server Actions ────────────────────────────────────────────────────────────
 
@@ -7,6 +9,7 @@ async function createCategory(formData: FormData) {
   "use server";
   const name = String(formData.get("name") ?? "").trim();
   const parentId = String(formData.get("parentId") ?? "").trim() || null;
+  const imageFile = formData.get("imageFile");
   if (!name) return;
 
   const slug = name
@@ -18,22 +21,44 @@ async function createCategory(formData: FormData) {
   const existing = await prisma.category.findUnique({ where: { slug } });
   const finalSlug = existing ? `${slug}-${Date.now()}` : slug;
 
-  await prisma.category.create({ data: { name, slug: finalSlug, parentId } });
+  let imageUrl = null;
+  if (imageFile instanceof File && imageFile.size > 0) {
+    try {
+      imageUrl = await uploadProductImage(imageFile, `cat-${randomUUID()}`);
+    } catch (e) {
+      console.error("Category image upload failed", e);
+    }
+  }
+
+  await prisma.category.create({ data: { name, slug: finalSlug, parentId, imageUrl } });
   revalidatePath("/admin/categories");
   revalidatePath("/products");
   revalidatePath("/collections");
+  revalidatePath("/");
 }
 
-async function renameCategory(formData: FormData) {
+async function updateCategory(formData: FormData) {
   "use server";
   const id = String(formData.get("id") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
+  const imageFile = formData.get("imageFile");
   if (!id || !name) return;
 
-  await prisma.category.update({ where: { id }, data: { name } });
+  const updateData: any = { name };
+
+  if (imageFile instanceof File && imageFile.size > 0) {
+    try {
+      updateData.imageUrl = await uploadProductImage(imageFile, id);
+    } catch (e) {
+      console.error("Category image update failed", e);
+    }
+  }
+
+  await prisma.category.update({ where: { id }, data: updateData });
   revalidatePath("/admin/categories");
   revalidatePath("/products");
   revalidatePath("/collections");
+  revalidatePath("/");
 }
 
 async function deleteCategory(formData: FormData) {
@@ -97,29 +122,44 @@ export default async function AdminCategoriesPage() {
         <p className="mt-1 text-xs text-studio-ink/60">
           Leave parent empty to create a top-level category.
         </p>
-        <form action={createCategory} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
-          <input
-            name="name"
-            required
-            placeholder="Category name"
-            className="rounded-xl border border-studio-primary/15 px-3 py-2 text-sm focus:border-studio-primary focus:outline-none"
-          />
-          <select
-            name="parentId"
-            className="rounded-xl border border-studio-primary/15 px-3 py-2 text-sm focus:border-studio-primary focus:outline-none"
-          >
-            <option value="">— No parent (top-level) —</option>
-            {parents.map((parent) => (
-              <option key={parent.id} value={parent.id}>
-                {parent.name}
-              </option>
-            ))}
-          </select>
+        <form action={createCategory} className="mt-4 grid gap-6 md:grid-cols-[1fr_1fr_1.5fr_auto] items-end">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-studio-ink/40">Category Name</label>
+            <input
+              name="name"
+              required
+              placeholder="e.g. Bridal Wear"
+              className="w-full rounded-xl border border-studio-primary/15 px-3 py-2 text-sm focus:border-studio-primary focus:outline-none"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-studio-ink/40">Parent Category</label>
+            <select
+              name="parentId"
+              className="w-full rounded-xl border border-studio-primary/15 px-3 py-2 text-sm focus:border-studio-primary focus:outline-none"
+            >
+              <option value="">— No parent —</option>
+              {parents.map((parent) => (
+                <option key={parent.id} value={parent.id}>
+                  {parent.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-studio-ink/40">Cover Image</label>
+            <input
+              type="file"
+              name="imageFile"
+              accept="image/*"
+              className="w-full text-xs text-studio-ink/50 file:mr-3 file:rounded-full file:border-0 file:bg-studio-primary/10 file:px-3 file:py-1.5 file:text-[10px] file:font-bold file:uppercase file:text-studio-primary"
+            />
+          </div>
           <button
             type="submit"
-            className="rounded-full bg-studio-primary px-5 py-2 text-sm font-semibold text-white transition hover:bg-studio-accent"
+            className="rounded-full bg-studio-primary px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-studio-accent"
           >
-            Add
+            Create
           </button>
         </form>
       </div>
@@ -148,18 +188,24 @@ export default async function AdminCategoriesPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <form action={renameCategory} className="flex gap-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <form action={updateCategory} className="flex flex-wrap items-center gap-4">
                     <input type="hidden" name="id" value={parent.id} />
                     <input
                       name="name"
                       required
                       defaultValue={parent.name}
-                      className="w-44 rounded-lg border border-studio-primary/15 px-2 py-1.5 text-sm"
+                      className="w-40 rounded-lg border border-studio-primary/15 px-2 py-1.5 text-sm"
+                    />
+                    <input
+                      type="file"
+                      name="imageFile"
+                      accept="image/*"
+                      className="w-48 text-[10px] text-studio-ink/40 file:mr-2 file:rounded file:border-0 file:bg-studio-primary/5 file:px-2 file:py-1 file:text-[10px] file:font-bold file:text-studio-primary"
                     />
                     <button
                       type="submit"
-                      className="rounded-lg border border-studio-primary/20 px-3 py-1.5 text-xs font-semibold text-studio-primary hover:bg-studio-light"
+                      className="rounded-lg bg-studio-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-studio-accent"
                     >
                       Save
                     </button>
@@ -209,18 +255,24 @@ export default async function AdminCategoriesPage() {
                             </p>
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <form action={renameCategory} className="flex gap-2">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <form action={updateCategory} className="flex flex-wrap items-center gap-4">
                             <input type="hidden" name="id" value={child.id} />
                             <input
                               name="name"
                               required
                               defaultValue={child.name}
-                              className="w-40 rounded-lg border border-studio-primary/15 px-2 py-1.5 text-sm"
+                              className="w-36 rounded-lg border border-studio-primary/15 px-2 py-1.5 text-sm"
+                            />
+                            <input
+                              type="file"
+                              name="imageFile"
+                              accept="image/*"
+                              className="w-44 text-[10px] text-studio-ink/40 file:mr-2 file:rounded file:border-0 file:bg-studio-primary/5 file:px-2 file:py-1 file:text-[10px] file:font-bold file:text-studio-primary"
                             />
                             <button
                               type="submit"
-                              className="rounded-lg border border-studio-primary/20 px-3 py-1.5 text-xs font-semibold text-studio-primary hover:bg-studio-light"
+                              className="rounded-lg bg-studio-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-studio-accent"
                             >
                               Save
                             </button>

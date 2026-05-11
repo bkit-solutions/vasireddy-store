@@ -1,7 +1,8 @@
 import { Hero } from "@/components/store/Hero";
 import { ProductCard } from "@/components/store/ProductCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { getActiveProducts, type StoreProduct } from "@/lib/store-data";
+import { getActiveProducts, getTrendingProducts, type StoreProduct } from "@/lib/store-data";
+import { getActiveBanners } from "@/lib/banner-data";
 import {
   Gem,
   ShieldCheck,
@@ -11,19 +12,24 @@ import {
   Star,
   Heart,
   Award,
+  Crown,
+  ShoppingBag,
 } from "lucide-react";
 import Link from "next/link";
 
 export default async function StoreHomePage() {
-  const products = (await getActiveProducts({ take: 9 })) as StoreProduct[];
+  const [allProducts, trending, banners] = await Promise.all([
+    getActiveProducts({ take: 6 }),
+    getTrendingProducts(3),
+    getActiveBanners(),
+  ]);
 
-  const latest = products.slice(0, 3);
-  const trending = products.slice(3, 6);
-  const featured = products.slice(6, 9);
+  const latest = allProducts.slice(0, 3);
+  const featured = allProducts.slice(3, 6);
 
   return (
     <div className="pb-20">
-      <Hero />
+      <Hero banners={banners} />
 
       {/* ─────────── TRUST STRIP ─────────── */}
       <section className="section-shell mt-8 animate-reveal-up">
@@ -56,111 +62,136 @@ export default async function StoreHomePage() {
           title="Latest Arrivals"
           subtitle="Freshly curated drops from our latest edit."
           accent="primary"
-          ctaHref="/collections"
-          ctaLabel="Shop New"
+          ctaHref="/products"
+          ctaLabel="Shop All"
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {latest.map((product) => (
-            <ProductCard key={product.id} {...product} />
-          ))}
+          {latest.length > 0 ? (
+            latest.map((product: StoreProduct) => <ProductCard key={product.id} {...product} />)
+          ) : (
+            <p className="col-span-full py-10 text-center text-studio-ink/40">No products found.</p>
+          )}
         </div>
       </section>
 
       {/* ─────────── TRENDING ─────────── */}
       <section className="section-shell mt-16 animate-reveal-up">
         <SectionBlock
-          tag="🔥 Hot Right Now"
+          tag="🔥 Hand-Picked"
           title="Trending Now"
-          subtitle="Most viewed picks for current wedding and festive edits."
+          subtitle="The most loved pieces selected by our studio team."
           accent="accent"
           ctaHref="/collections"
           ctaLabel="Explore Trends"
         />
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {trending.map((product) => (
-            <ProductCard key={product.id} {...product} />
-          ))}
+          {trending.length > 0 ? (
+            trending.map((product: StoreProduct) => <ProductCard key={product.id} {...product} />)
+          ) : (
+            <div className="col-span-full rounded-3xl border border-dashed border-studio-primary/10 bg-studio-light/30 p-12 text-center">
+               <p className="text-studio-ink/50 text-sm">Select trending items in the admin panel to show them here!</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ─────────── PROMO BANNERS ─────────── */}
-      <section className="section-shell mt-16 animate-reveal-up">
-        <div className="grid gap-4 md:grid-cols-2">
+      {/* ─────────── PROMO BANNERS - REDESIGNED ─────────── */}
+      <section className="section-shell mt-32 animate-reveal-up">
+        <div className="grid gap-8 md:grid-cols-2">
           {/* Bridal Banner */}
-          <article className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-studio-primary via-studio-primary to-studio-primary/90 px-6 py-10 text-white shadow-[0_24px_45px_-30px_rgba(63,52,143,0.8)] transition-all hover:shadow-[0_30px_55px_-30px_rgba(63,52,143,0.95)] md:px-10 md:py-12">
-            {/* Decorative elements */}
-            <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/5 blur-2xl transition-transform duration-700 group-hover:scale-125" />
-            <div className="pointer-events-none absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-studio-accent/20 blur-2xl" />
-            <div className="pointer-events-none absolute right-6 top-6 text-white/10">
-              <Gem size={80} />
-            </div>
+          <article className="group relative min-h-[420px] overflow-hidden rounded-[3.5rem] bg-[#120f0d] shadow-[0_40px_80px_-20px_rgba(18,15,13,0.4)] transition-all hover:shadow-[0_60px_100px_-20px_rgba(18,15,13,0.5)]">
+            {/* Background Texture/Pattern */}
+            <div className="absolute inset-0 opacity-15 transition-transform duration-1000 group-hover:scale-110" 
+                 style={{ backgroundImage: "linear-gradient(30deg, #333 12%, transparent 12.5%, transparent 87%, #333 87.5%, #333), linear-gradient(150deg, #333 12%, transparent 12.5%, transparent 87%, #333 87.5%, #333), linear-gradient(30deg, #333 12%, transparent 12.5%, transparent 87%, #333 87.5%, #333), linear-gradient(150deg, #333 12%, transparent 12.5%, transparent 87%, #333 87.5%, #333), linear-gradient(60deg, #555 25%, transparent 25.5%, transparent 75%, #555 75%, #555), linear-gradient(60deg, #555 25%, transparent 25.5%, transparent 75%, #555 75%, #555)", backgroundSize: "40px 70px" }} />
+            
+            <div className="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-studio-accent/20 blur-[100px] transition-all duration-700 group-hover:bg-studio-accent/30" />
+            
+            <div className="relative flex h-full flex-col justify-between p-10 md:p-14">
+              <div>
+                <div className="inline-flex items-center gap-3 rounded-full bg-white/5 px-5 py-2 text-[10px] font-bold uppercase tracking-[0.3em] text-studio-accent backdrop-blur-xl border border-white/10">
+                  <Crown size={14} strokeWidth={1.5} />
+                  Bridal Couture
+                </div>
+                <h3 className="mt-8 font-serif text-4xl font-semibold leading-tight text-white md:text-5xl lg:text-6xl">
+                  Curated Bridal <br /> Statements
+                </h3>
+                <p className="mt-6 max-w-sm text-base text-white/60 leading-relaxed md:text-lg">
+                  Timeless zari work and handcrafted embroidery designed for your most precious moments.
+                </p>
+              </div>
 
-            <div className="relative">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] backdrop-blur">
-                <Sparkles size={12} />
-                Wedding Collection
-              </span>
-              <h3 className="mt-4 font-serif text-3xl font-semibold leading-tight md:text-4xl">
-                Curated Bridal <br /> Statements
-              </h3>
-              <p className="mt-3 max-w-sm text-sm text-white/80 md:text-base">
-                Exclusive zari, silk, and handcrafted embroidery for your big day.
-              </p>
-              <Link
-                href="/collections?category=sarees"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-studio-primary transition-all hover:gap-3 hover:bg-studio-light"
-              >
-                Shop Bridal
-                <ArrowRight size={14} />
-              </Link>
+              <div className="mt-12">
+                <Link
+                  href="/collections"
+                  className="group/btn inline-flex items-center gap-4 rounded-full bg-white px-10 py-5 text-[11px] font-bold uppercase tracking-[0.25em] text-studio-primary shadow-2xl transition-all hover:bg-studio-accent hover:text-white"
+                >
+                  Shop Collection
+                  <ArrowRight size={18} className="transition-transform group-hover/btn:translate-x-2" />
+                </Link>
+              </div>
+            </div>
+            
+            <div className="pointer-events-none absolute bottom-0 right-0 p-10 text-white/[0.03] transition-transform duration-700 group-hover:translate-x-4 group-hover:-translate-y-4">
+              <ShoppingBag size={240} strokeWidth={0.5} />
             </div>
           </article>
 
           {/* Festive Banner */}
-          <article className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-studio-accent via-studio-accent to-studio-accent/90 px-6 py-10 text-white shadow-[0_24px_45px_-30px_rgba(84,70,203,0.8)] transition-all hover:shadow-[0_30px_55px_-30px_rgba(84,70,203,0.95)] md:px-10 md:py-12">
-            <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/5 blur-2xl transition-transform duration-700 group-hover:scale-125" />
-            <div className="pointer-events-none absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-studio-primary/30 blur-2xl" />
-            <div className="pointer-events-none absolute right-6 top-6 text-white/10">
-              <Sparkles size={80} />
+          <article className="group relative min-h-[420px] overflow-hidden rounded-[3.5rem] bg-[#1a1635] shadow-[0_40px_80px_-20px_rgba(26,22,53,0.4)] transition-all hover:shadow-[0_60px_100px_-20px_rgba(26,22,53,0.5)]">
+             {/* Background Texture/Pattern */}
+             <div className="absolute inset-0 opacity-10 transition-transform duration-1000 group-hover:scale-110" 
+                 style={{ backgroundImage: "radial-gradient(circle at 2px 2px, #fff 1px, transparent 0)", backgroundSize: "32px 32px" }} />
+
+            <div className="absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-studio-accent/20 blur-[100px] transition-all duration-700 group-hover:bg-studio-accent/30" />
+            
+            <div className="relative flex h-full flex-col justify-between p-10 md:p-14">
+              <div>
+                <div className="inline-flex items-center gap-3 rounded-full bg-white/5 px-5 py-2 text-[10px] font-bold uppercase tracking-[0.3em] text-studio-accent backdrop-blur-xl border border-white/10">
+                  <Sparkles size={14} strokeWidth={1.5} />
+                  Festive Edit
+                </div>
+                <h3 className="mt-8 font-serif text-4xl font-semibold leading-tight text-white md:text-5xl lg:text-6xl">
+                  The Celebration <br /> Boutique
+                </h3>
+                <p className="mt-6 max-w-sm text-base text-white/60 leading-relaxed md:text-lg">
+                  Luminous palettes and contemporary silhouettes for the modern woman of celebration.
+                </p>
+              </div>
+
+              <div className="mt-12">
+                <Link
+                  href="/collections"
+                  className="group/btn inline-flex items-center gap-4 rounded-full bg-white px-10 py-5 text-[11px] font-bold uppercase tracking-[0.25em] text-studio-accent shadow-2xl transition-all hover:bg-studio-primary hover:text-white"
+                >
+                  Explore Festive
+                  <ArrowRight size={18} className="transition-transform group-hover/btn:translate-x-2" />
+                </Link>
+              </div>
             </div>
 
-            <div className="relative">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] backdrop-blur">
-                <Star size={12} />
-                Festive Collection
-              </span>
-              <h3 className="mt-4 font-serif text-3xl font-semibold leading-tight md:text-4xl">
-                The Celebration <br /> Edit
-              </h3>
-              <p className="mt-3 max-w-sm text-sm text-white/80 md:text-base">
-                Luminous palettes and festive silhouettes for every occasion.
-              </p>
-              <Link
-                href="/collections?category=blouses"
-                className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.15em] text-studio-accent transition-all hover:gap-3 hover:bg-studio-light"
-              >
-                Shop Festive
-                <ArrowRight size={14} />
-              </Link>
+            <div className="pointer-events-none absolute bottom-0 right-0 p-10 text-white/[0.03] transition-transform duration-700 group-hover:translate-x-4 group-hover:-translate-y-4">
+              <Star size={240} strokeWidth={0.5} />
             </div>
           </article>
         </div>
       </section>
 
       {/* ─────────── FEATURED ─────────── */}
-      <section className="section-shell mt-16 animate-reveal-up">
+      <section className="section-shell mt-32 animate-reveal-up">
         <SectionBlock
           tag="Editor's Pick"
           title="Featured Products"
           subtitle="Luxe looks crafted for celebrations all year round."
           accent="primary"
-          ctaHref="/collections"
-          ctaLabel="View Featured"
+          ctaHref="/products"
+          ctaLabel="View All"
         />
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((product) => (
-            <ProductCard key={product.id} {...product} />
-          ))}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {featured.length > 0 ? (
+            featured.map((product: StoreProduct) => <ProductCard key={product.id} {...product} />)
+          ) : (
+            <p className="col-span-full py-10 text-center text-studio-ink/40">No featured products.</p>
+          )}
         </div>
       </section>
 

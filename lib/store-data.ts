@@ -23,11 +23,19 @@ export type CategoryWithStats = {
 
 export async function getStoreCategories() {
   const categories = await prisma.category.findMany({
+    where: {
+      products: {
+        some: {
+          isActive: true,
+        },
+      },
+    },
     orderBy: { name: "asc" },
     select: {
       id: true,
       name: true,
       slug: true,
+      imageUrl: true,
     },
   });
 
@@ -35,12 +43,26 @@ export async function getStoreCategories() {
     id: category.id,
     title: category.name,
     slug: category.slug,
+    imageUrl: category.imageUrl,
   }));
 }
 
 export async function getCategoriesWithStats() {
   const categories = await prisma.category.findMany({
+    where: {
+      products: {
+        some: {
+          isActive: true,
+        },
+      },
+    },
     include: {
+      products: {
+        where: { isActive: true },
+        take: 1,
+        select: { imageUrl: true },
+        orderBy: { createdAt: "desc" },
+      },
       _count: {
         select: {
           products: {
@@ -61,16 +83,24 @@ export async function getCategoriesWithStats() {
     name: category.name,
     slug: category.slug,
     productCount: category._count.products,
+    // Fallback: Use category image, then first product image, then null
+    imageUrl: category.imageUrl || category.products[0]?.imageUrl || null,
   }));
 }
 
-export async function getActiveProducts(options?: { q?: string; category?: string; take?: number }) {
-  const q = options?.q?.trim();
+export async function getTrendingProducts(take: number = 3) {
+  return getActiveProducts({ take, isTrending: true });
+}
+
+export async function getActiveProducts(options?: { q?: string; category?: string; take?: number; isTrending?: boolean }) {
+  const q = options?.q?.trim().toLowerCase();
   const category = options?.category?.trim();
+  const isTrending = options?.isTrending;
 
   const products = await prisma.product.findMany({
     where: {
       isActive: true,
+      ...(isTrending !== undefined ? { isTrending } : {}),
       ...(q
         ? {
             OR: [
@@ -79,12 +109,10 @@ export async function getActiveProducts(options?: { q?: string; category?: strin
               { sku: { contains: q } },
               {
                 category: {
-                  name: { contains: q },
-                },
-              },
-              {
-                category: {
-                  slug: { contains: q.toLowerCase() },
+                  OR: [
+                    { name: { contains: q } },
+                    { slug: { contains: q } },
+                  ],
                 },
               },
             ],
@@ -205,12 +233,12 @@ export async function searchProducts(query: string, options?: { limit?: number; 
           }
         : {}),
       OR: [
-        { name: { contains: q, mode: "insensitive" } },
-        { description: { contains: q, mode: "insensitive" } },
-        { sku: { contains: q, mode: "insensitive" } },
+        { name: { contains: q } },
+        { description: { contains: q } },
+        { sku: { contains: q } },
         {
           category: {
-            name: { contains: q, mode: "insensitive" },
+            name: { contains: q },
           },
         },
       ],

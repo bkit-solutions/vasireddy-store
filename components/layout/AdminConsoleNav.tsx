@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderTree, LayoutDashboard, Menu, Package, ShoppingBag, Tag, Users, X } from "lucide-react";
+import { FolderTree, LayoutDashboard, Menu, Package, ShoppingBag, Tag, Users, X, Image as ImageIcon } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/banners", label: "Hero Banners", icon: ImageIcon },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: FolderTree },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },

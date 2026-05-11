@@ -6,14 +6,14 @@ import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Sparkles, ArrowRight, Star } from "lucide-react";
 import { useRef } from "react";
 
-// Replace these with your actual product images in /public/hero/
-const FLOATING_OUTFITS = [
-  { src: "/hero/lehenga.jpg", alt: "Bridal Lehenga", tag: "Bridal", delay: 0 },
-  { src: "/hero/saree.jpg", alt: "Designer Saree", tag: "Festive", delay: 0.2 },
-  { src: "/hero/anarkali.webp", alt: "Anarkali Gown", tag: "Reception", delay: 0.4 },
-];
+type Banner = {
+  imageUrl: string;
+  altText: string;
+  tag?: string | null;
+  link?: string | null;
+};
 
-export function Hero() {
+export function Hero({ banners = [] }: { banners?: Banner[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -38,6 +38,20 @@ export function Hero() {
     mouseX.set(0);
     mouseY.set(0);
   };
+
+  // Use dynamic banners if provided, otherwise fallback to placeholders
+  const displayBanners = banners.length > 0 
+    ? banners.slice(0, 3).map((b, i) => ({
+        src: b.imageUrl,
+        alt: b.altText,
+        tag: b.tag || "Exclusive",
+        delay: i * 0.2
+      }))
+    : [
+        { src: "/hero/lehenga.jpg", alt: "Bridal Lehenga", tag: "Bridal", delay: 0 },
+        { src: "/hero/saree.jpg", alt: "Designer Saree", tag: "Festive", delay: 0.2 },
+        { src: "/hero/anarkali.webp", alt: "Anarkali Gown", tag: "Reception", delay: 0.4 },
+      ];
 
   return (
     <section className="section-shell pt-10 md:pt-14">
@@ -97,13 +111,13 @@ export function Hero() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 rounded-full border border-studio-primary/15 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-studio-primary backdrop-blur-sm"
+              className="inline-flex items-center gap-2 rounded-full border border-studio-primary/15 bg-white/80 px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-studio-primary backdrop-blur-sm"
             >
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-studio-accent opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-studio-accent" />
               </span>
-              Vasireddy Designer Studio
+              Vaisreddy&apos;s Designer Studio
             </motion.span>
 
             <motion.h1
@@ -112,10 +126,10 @@ export function Hero() {
               transition={{ delay: 0.3, duration: 0.8 }}
               className="mt-6 max-w-2xl text-4xl font-semibold leading-[1.05] tracking-tight text-studio-primary md:text-6xl lg:text-7xl"
             >
-              Crafted for grand{" "}
+              Beautiful designs for your{" "}
               <span className="relative inline-block">
                 <span className="relative z-10 bg-gradient-to-r from-studio-accent via-studio-primary to-studio-accent bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-shine">
-                  celebrations
+                  special moments
                 </span>
                 <motion.svg
                   className="absolute -bottom-2 left-0 w-full"
@@ -137,7 +151,7 @@ export function Hero() {
                   />
                 </motion.svg>
               </span>{" "}
-              and couture confidence.
+              and everyday style.
             </motion.h1>
 
             <motion.p
@@ -146,7 +160,7 @@ export function Hero() {
               transition={{ delay: 0.5 }}
               className="mt-6 max-w-xl text-base leading-7 text-studio-ink/80 md:text-lg"
             >
-             Explore bridal, festive, and everyday styles for modern Indian wear.
+              Find the perfect bridal, festive, and daily wear outfits here.
             </motion.p>
 
             <motion.div
@@ -207,9 +221,9 @@ export function Hero() {
             style={{ transform: "translateZ(60px)" }}
             className="relative h-[520px] w-full"
           >
-            {FLOATING_OUTFITS.map((outfit, i) => (
+            {displayBanners.map((outfit, i) => (
               <motion.div
-                key={outfit.alt}
+                key={`${outfit.alt}-${i}`}
                 initial={{ opacity: 0, y: 60, rotate: i % 2 === 0 ? -8 : 8 }}
                 animate={{ opacity: 1, y: 0, rotate: i % 2 === 0 ? -4 : 4 }}
                 transition={{
@@ -224,7 +238,7 @@ export function Hero() {
                   height: "70%",
                   top: `${i * 12}%`,
                   left: `${i * 18}%`,
-                  zIndex: FLOATING_OUTFITS.length - i,
+                  zIndex: displayBanners.length - i,
                 }}
               >
                 <motion.div
@@ -237,10 +251,8 @@ export function Hero() {
                   }}
                   className="relative h-full w-full"
                 >
-                  {/* Fallback gradient if image missing */}
                   <div className="absolute inset-0 bg-gradient-to-br from-studio-cream via-studio-accent/20 to-studio-primary/30" />
 
-                  {/* Uncomment when you have images in /public/hero/ */}
                   <Image
                     src={outfit.src}
                     alt={outfit.alt}
@@ -297,8 +309,6 @@ export function Hero() {
             </motion.div>
           </div>
         </motion.div>
-
-       
       </motion.div>
     </section>
   );

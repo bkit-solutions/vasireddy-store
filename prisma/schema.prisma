@@ -31,10 +31,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  cart    Cart?
-  orders  Order[]
-  reviews Review[]
+  cart      Cart?
+  orders    Order[]
+  reviews   Review[]
   wishlistItems WishlistItem[]
+  addresses Address[]
 }
 
 model Category {
@@ -48,6 +49,7 @@ model Category {
   parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children Category[] @relation("CategoryTree")
   products Product[]
+  imageUrl String?
 }
 
 model Product {
@@ -59,6 +61,7 @@ model Product {
   sku         String     @unique
   imageUrl    String?
   isActive    Boolean    @default(true)
+  isTrending  Boolean    @default(false)
   stock       Int        @default(0)
   categoryId  String
   createdAt   DateTime   @default(now())
@@ -121,11 +124,36 @@ model CartItem {
   @@unique([cartId, productId])
 }
 
+model Address {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  phone        String
+  street       String
+  city         String
+  state        String
+  pincode      String
+  country      String   @default("India")
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Order {
   id                   String      @id @default(cuid())
   userId               String
   status               OrderStatus @default(PENDING)
   totalAmount          Int
+
+  // Shipping Details (Snapshot at time of order)
+  shippingName         String?
+  shippingPhone        String?
+  shippingAddress      String? @db.Text
+  shippingCity         String?
+  shippingState        String?
+  shippingPincode      String?
 
   razorpayOrderId      String? @unique
   razorpayPaymentId    String?
@@ -180,4 +208,26 @@ model Coupon {
   expiresAt       DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  altText   String
+  tag       String?
+  link      String?
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

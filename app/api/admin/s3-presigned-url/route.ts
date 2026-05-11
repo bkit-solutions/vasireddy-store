@@ -5,7 +5,7 @@ import { getProductImageCount, isS3Configured } from "@/lib/s3-uploader";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-const MAX_IMAGES_PER_PRODUCT = 5;
+const MAX_IMAGES_PER_PRODUCT = 100;
 const ALLOWED_FORMATS = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export async function POST(request: NextRequest) {

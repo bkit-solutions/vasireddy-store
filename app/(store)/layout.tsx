@@ -2,6 +2,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { ProfileGuard } from "@/components/store/ProfileGuard";
 
 export default function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
       <Footer />
       <ToastProvider />
       <WhatsAppButton />
+      <ProfileGuard />
     </div>
   );
 }

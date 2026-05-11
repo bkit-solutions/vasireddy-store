@@ -11,8 +11,37 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = (await request.json()) as { couponCode?: string | null };
+  const body = (await request.json()) as { 
+    couponCode?: string | null,
+    addressId?: string | null,
+    shippingDetails: {
+      name: string;
+      phone: string;
+      street: string;
+      city: string;
+      state: string;
+      pincode: string;
+    }
+  };
+  
   const couponCode = body.couponCode?.trim().toUpperCase() ?? null;
+  const { shippingDetails } = body;
+
+  // 🛡️ Server-side guard: Mandatory Address Check
+  if (
+    !shippingDetails ||
+    !shippingDetails.name ||
+    !shippingDetails.phone ||
+    !shippingDetails.street ||
+    !shippingDetails.city ||
+    !shippingDetails.state ||
+    !shippingDetails.pincode
+  ) {
+    return NextResponse.json(
+      { error: "Shipping details are mandatory for delivery" },
+      { status: 400 }
+    );
+  }
 
   const cart = await prisma.cart.findUnique({
     where: { userId: session.user.id },
@@ -56,13 +85,22 @@ export async function POST(request: Request) {
     receipt: `receipt_${Date.now()}`,
   });
 
-  // ✅ Save order in DB
+  // ✅ Save order in DB with shipping details
   const order = await prisma.order.create({
     data: {
       userId: session.user.id,
       totalAmount: finalAmount,
       status: "PENDING",
       razorpayOrderId: razorpayOrder.id,
+      
+      // Shipping Details Snapshot
+      shippingName: shippingDetails.name,
+      shippingPhone: shippingDetails.phone,
+      shippingAddress: shippingDetails.street,
+      shippingCity: shippingDetails.city,
+      shippingState: shippingDetails.state,
+      shippingPincode: shippingDetails.pincode,
+
       items: {
         create: cart.items.map((item) => ({
           productId: item.productId,
@@ -72,6 +110,42 @@ export async function POST(request: Request) {
       },
     },
   });
+
+  // ✅ Save NEW address in User profile if it wasn't selected from existing ones
+  if (!body.addressId) {
+    try {
+      // Check if an identical address already exists for this user to avoid duplicates
+      const existing = await prisma.address.findFirst({
+        where: {
+          userId: session.user.id,
+          name: shippingDetails.name,
+          phone: shippingDetails.phone,
+          street: shippingDetails.street,
+          city: shippingDetails.city,
+          state: shippingDetails.state,
+          pincode: shippingDetails.pincode,
+        },
+      });
+
+      if (!existing) {
+        await prisma.address.create({
+          data: {
+            userId: session.user.id,
+            name: shippingDetails.name,
+            phone: shippingDetails.phone,
+            street: shippingDetails.street,
+            city: shippingDetails.city,
+            state: shippingDetails.state,
+            pincode: shippingDetails.pincode,
+            // If they have no addresses, make this one the default
+            isDefault: (await prisma.address.count({ where: { userId: session.user.id } })) === 0,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Failed to auto-save address to profile", error);
+    }
+  }
 
   return NextResponse.json({
     orderId: razorpayOrder.id,

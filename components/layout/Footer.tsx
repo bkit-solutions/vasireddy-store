@@ -33,7 +33,7 @@ export function Footer() {
               </p>
 
               <h3 className="mt-2.5 max-w-md text-[26px] font-semibold leading-[1.2] text-studio-primary md:text-[30px]">
-                Vasireddy Designer Studio
+                Vasireddy's Designer Studio
               </h3>
 
               <p className="mt-4 max-w-md text-sm leading-7 text-studio-ink/70">
@@ -134,7 +134,7 @@ export function Footer() {
           {/* ─── Bottom Bar ─── */}
           <div className="mt-12 flex flex-col items-center gap-3 border-t border-studio-primary/10 pt-6 text-xs text-studio-ink/55 md:flex-row md:justify-between">
             <p className="tracking-wide">
-              © {new Date().getFullYear()} Vasireddy Designer Studio. All rights reserved.
+              © {new Date().getFullYear()} Vasireddy's Designer Studio. All rights reserved.
             </p>
             <p className="flex items-center gap-2 tracking-[0.16em]">
               <span>Powered by</span>

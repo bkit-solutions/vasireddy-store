@@ -312,3 +312,26 @@ export async function sendOfferAnnouncementEmail(input: {
     });
   }
 }
+
+export async function sendPasswordResetOtpEmail(to: string, otp: string) {
+  const html = buildMailLayout({
+    preheader: "Reset your account password",
+    title: "Password Reset Request",
+    subtitle: "We received a request to reset your password.",
+    bodyHtml: `
+      <p style="margin:0 0 16px 0;">Hello,</p>
+      <p style="margin:0 0 16px 0;">Your verification code to reset your password is:</p>
+      <div style="background:#ffffff;border:2px solid #3f348f;border-radius:12px;padding:20px;text-align:center;margin-bottom:16px;">
+        <span style="font-size:32px;font-weight:800;letter-spacing:8px;color:#3f348f;">${otp}</span>
+      </div>
+      <p style="margin:0 0 12px 0;">This code is valid for <strong>15 minutes</strong>. If you did not request a password reset, please ignore this email.</p>
+      <p style="margin:0;">For your security, do not share this code with anyone.</p>
+    `,
+  });
+
+  await sendMailSafe({
+    to,
+    subject: "Reset your password - Vasireddy Designer Studio",
+    html,
+  });
+}

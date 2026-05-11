@@ -197,6 +197,9 @@ export default async function AdminOrdersPage({
           { id: { contains: q } },
           { user: { name: { contains: q } } },
           { user: { email: { contains: q } } },
+          { shippingName: { contains: q } },
+          { shippingPhone: { contains: q } },
+          { shippingAddress: { contains: q } },
           { items: { some: { product: { name: { contains: q } } } } },
         ],
       }
@@ -331,16 +334,35 @@ export default async function AdminOrdersPage({
               </div>
 
               {/* Body */}
-              <div className="grid gap-4 p-4 sm:px-5 lg:grid-cols-[1fr_1fr_auto]">
+              <div className="grid gap-6 p-4 sm:px-5 lg:grid-cols-[1.2fr_1fr_1.5fr_auto]">
                 {/* Customer */}
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-studio-ink/50">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-studio-ink/40">
                     Customer
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-studio-ink">
+                  <p className="mt-1 text-sm font-semibold text-studio-primary">
                     {order.user.name ?? "Guest"}
                   </p>
-                  <p className="text-xs text-studio-ink/65">{order.user.email}</p>
+                  <p className="text-[11px] text-studio-ink/60">{order.user.email}</p>
+                </div>
+
+                {/* Shipping To */}
+                <div className="rounded-xl border border-studio-primary/5 bg-studio-light/10 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-studio-accent">
+                    Shipping To
+                  </p>
+                  <p className="mt-1 text-xs font-bold text-studio-primary">
+                    {order.shippingName || order.user.name}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-studio-ink/70">
+                    {order.shippingAddress}
+                  </p>
+                  <p className="text-[11px] text-studio-ink/70">
+                    {order.shippingCity}, {order.shippingState} - {order.shippingPincode}
+                  </p>
+                  <p className="mt-1.5 text-[11px] font-bold text-studio-primary">
+                    📞 {order.shippingPhone}
+                  </p>
                 </div>
 
                 {/* Items */}

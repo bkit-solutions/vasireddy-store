@@ -31,14 +31,16 @@ async function upsertProduct(data: {
 }
 
 async function main() {
-  const passwordHash = await hash("Admin@123", 10);
+  const passwordHash = await hash("Vasavi@4241", 10);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@vasireddydesigner.com" },
-    update: {},
+    where: { email: "vasireddydesigners@gmail.com" },
+    update: {
+      passwordHash,
+    },
     create: {
       name: "Studio Admin",
-      email: "admin@vasireddydesigner.com",
+      email: "vasireddydesigners@gmail.com",
       role: UserRole.ADMIN,
       passwordHash,
     },

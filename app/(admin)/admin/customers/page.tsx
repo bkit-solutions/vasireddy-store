@@ -39,6 +39,7 @@ export default async function AdminCustomersPage({
         where,
         include: {
           _count: { select: { orders: true } },
+          addresses: { where: { isDefault: true }, take: 1 },
           orders: {
             select: { totalAmount: true, createdAt: true, status: true },
             orderBy: { createdAt: "desc" },
@@ -221,10 +222,10 @@ export default async function AdminCustomersPage({
               key={customer.id}
               className="rounded-2xl border border-studio-primary/10 bg-white p-4 shadow-sm transition hover:shadow-md sm:p-5"
             >
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                {/* Identity */}
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-studio-primary to-studio-accent text-sm font-semibold text-white">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                {/* Identity & Address */}
+                <div className="flex gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-studio-primary to-studio-accent text-sm font-semibold text-white">
                     {initials}
                   </div>
                   <div className="min-w-0">
@@ -239,7 +240,18 @@ export default async function AdminCustomersPage({
                       </span>
                     </div>
                     <p className="truncate text-xs text-studio-ink/65">{customer.email}</p>
-                    <p className="mt-0.5 text-[11px] text-studio-ink/50">
+                    
+                    {/* Address Snapshot */}
+                    {customer.addresses[0] && (
+                      <div className="mt-3 rounded-xl bg-studio-light/30 p-3 text-[11px] leading-relaxed text-studio-ink/70">
+                         <p className="font-bold text-studio-primary mb-1 uppercase tracking-wider">Default Address</p>
+                         <p>{customer.addresses[0].street}</p>
+                         <p>{customer.addresses[0].city}, {customer.addresses[0].state} - {customer.addresses[0].pincode}</p>
+                         <p className="mt-1 font-semibold">📞 {customer.addresses[0].phone}</p>
+                      </div>
+                    )}
+
+                    <p className="mt-2 text-[11px] text-studio-ink/50 italic">
                       Joined{" "}
                       {new Date(customer.createdAt).toLocaleDateString("en-IN", {
                         day: "2-digit",
