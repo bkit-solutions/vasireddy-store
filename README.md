@@ -1,4 +1,4 @@
-# Vasireddy's Designer Studio
+# Vasireddy's Designer Studio.
 
 Full-stack luxury ecommerce platform for a premium saree and blouse boutique. Modernized with a user-centric address management ecosystem, editorial landing page grids, and a streamlined boutique checkout experience.
 
