@@ -31,7 +31,7 @@ async function upsertProduct(data: {
 }
 
 async function main() {
-  const passwordHash = await hash("Vasavi@4241", 10);
+  const passwordHash = await hash("Vasavi@8520", 10);
 
   const admin = await prisma.user.upsert({
     where: { email: "vasireddydesigners@gmail.com" },

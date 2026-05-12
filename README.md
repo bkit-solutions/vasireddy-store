@@ -64,10 +64,8 @@ prisma/                   # Schema (Addresses, Orders, Snapshots)
 
 ## Deployment & Setup
 
-### 1. Official Admin Credentials
-The application is pre-configured with official administrative access:
-- **Email**: `vasireddydesigners@gmail.com`
-- **Password**: `Vasavi@4241`
+### 1. Admin Credentials
+Administrative access is restricted to authorized studio personnel. Please contact the system administrator for the current login credentials.
 
 ### 2. Environment Configuration
 Ensure your `.env` contains the following for production:

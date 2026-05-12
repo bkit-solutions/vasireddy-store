@@ -351,7 +351,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
           <div className="mt-5 flex items-baseline gap-3">
             <p className="text-3xl font-bold text-studio-ink">{formatCurrency(product.price)}</p>
-            <p className="text-lg text-studio-ink/40 line-through">{formatCurrency(product.price * 1.25)}</p>
+            <p className="text-lg text-studio-ink/40 line-through">{formatCurrency(Math.round(product.price / 0.8))}</p>
             <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
               20% OFF
             </span>

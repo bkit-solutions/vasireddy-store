@@ -21,8 +21,12 @@ export function ProductCard({ id, name, slug, imageUrl, category, price }: Produ
       <div className="mt-4 flex items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-[0.14em] text-studio-accent">{category}</p>
-          <h3 className="mt-1 text-lg font-semibold text-studio-primary">{name}</h3>
-          <p className="mt-2 text-sm font-medium text-studio-ink/90">{formatCurrency(price)}</p>
+          <h3 className="mt-1 text-lg font-semibold text-studio-primary line-clamp-1">{name}</h3>
+          <div className="mt-2 flex items-baseline gap-2">
+            <p className="text-base font-bold text-studio-ink">{formatCurrency(price)}</p>
+            <p className="text-[11px] text-studio-ink/40 line-through">{formatCurrency(Math.round(price / 0.8))}</p>
+            <span className="text-[10px] font-bold text-emerald-600">20% OFF</span>
+          </div>
         </div>
         <WishlistButton productId={id} />
       </div>

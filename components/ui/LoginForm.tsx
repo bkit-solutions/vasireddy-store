@@ -16,8 +16,8 @@ type LoginFormProps = {
 export function LoginForm({ title, subtitle, adminOnly = false, callbackUrl = "/" }: LoginFormProps) {
   const router = useRouter();
 
-  const [email, setEmail] = useState(adminOnly ? "vasireddydesigners@gmail.com" : "");
-  const [password, setPassword] = useState(adminOnly ? "Vasavi@4241" : "");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
